@@ -13,6 +13,8 @@ concurrency:
 env:
   FORCE_COLOR: 1
   PIP_USE_UV: 1
+  # Add pytest configuration through environment variables
+  PYTEST_ADDOPTS: "--junitxml=junit.xml --log-file=pytest.log"
 
 jobs:
   test:
@@ -59,19 +61,14 @@ jobs:
         run: python -m scripts.setup
 
       - name: Run tests
-        # Create a directory for test results
-        run: |
-          mkdir -p test-results
-          # Run tests with result and log output
-          python -m scripts.test \
-            --junitxml=test-results/junit.xml \
-            --log-file=test-results/pytest.log \
-            app api
+        run: python -m scripts.test
 
       - name: Upload test results
-        if: always() # Upload even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.python-version }}
-          path: test-results/
+          path: |
+            **/junit.xml
+            **/pytest.log
           retention-days: 30
