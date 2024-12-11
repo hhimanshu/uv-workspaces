@@ -6,7 +6,6 @@ on:
   push:
     branches: ["main"]
 
-# This ensures we don't have multiple workflows running for the same PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -14,7 +13,7 @@ concurrency:
 env:
   FORCE_COLOR: 1
   PIP_USE_UV: 1
-  # Configure pytest to generate the XML report in a known location
+  # We configure pytest to generate JUnit XML in a specific format
   PYTEST_ADDOPTS: "--junitxml=test-results/junit.xml --log-file=test-results/pytest.log"
 
 jobs:
@@ -23,9 +22,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     permissions:
-      # These permissions are needed for dorny/test-reporter to create check runs
       checks: write
       pull-requests: write
+      contents: read
 
     strategy:
       fail-fast: false
@@ -65,26 +64,34 @@ jobs:
       - name: Setup development environment
         run: python -m scripts.setup
 
-      # Create the results directory before running tests
+      # Create test results directory and ensure it exists
       - name: Prepare test environment
-        run: mkdir -p test-results
+        run: |
+          mkdir -p test-results
+          echo "Created test results directory at: $(pwd)/test-results"
 
+      # Run tests and ensure the XML is generated
       - name: Run tests
-        run: python -m scripts.test
-        # Continue to the reporting step even if tests fail
+        id: run-tests
+        run: |
+          python -m scripts.test
+          echo "Checking test results:"
+          ls -la test-results/ || true
         continue-on-error: true
 
-      # This will create a nice report in the PR
+      # Publish test results as a GitHub check run
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure() # run this step even if previous step failed
         with:
-          name: Test Results
-          path: test-results/junit.xml
-          reporter: jest-junit # Format of test results
-          fail-on-error: true
+          name: Python Test Results # Name of the check run which will be created
+          path: test-results/junit.xml # Path to test results
+          reporter: java-junit # Format of test results
+          fail-on-error: true # Fail the step if there are test failures
+          list-suites: "all" # List all test suites in the report
+          list-tests: "all" # List all test cases in the report
 
-      # We still keep the artifact upload for detailed logs
+      # Keep the artifact upload for detailed logs
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
