@@ -6,6 +6,7 @@ on:
   push:
     branches: ["main"]
 
+# This ensures we don't have multiple workflows running for the same PR
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -13,14 +14,18 @@ concurrency:
 env:
   FORCE_COLOR: 1
   PIP_USE_UV: 1
-  # Add pytest configuration through environment variables
-  PYTEST_ADDOPTS: "--junitxml=junit.xml --log-file=pytest.log"
+  # Configure pytest to generate the XML report in a known location
+  PYTEST_ADDOPTS: "--junitxml=test-results/junit.xml --log-file=test-results/pytest.log"
 
 jobs:
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    permissions:
+      # These permissions are needed for dorny/test-reporter to create check runs
+      checks: write
+      pull-requests: write
 
     strategy:
       fail-fast: false
@@ -60,15 +65,30 @@ jobs:
       - name: Setup development environment
         run: python -m scripts.setup
 
+      # Create the results directory before running tests
+      - name: Prepare test environment
+        run: mkdir -p test-results
+
       - name: Run tests
         run: python -m scripts.test
+        # Continue to the reporting step even if tests fail
+        continue-on-error: true
 
+      # This will create a nice report in the PR
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: Test Results
+          path: test-results/junit.xml
+          reporter: jest-junit # Format of test results
+          fail-on-error: true
+
+      # We still keep the artifact upload for detailed logs
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.python-version }}
-          path: |
-            **/junit.xml
-            **/pytest.log
+          path: test-results/
           retention-days: 30
