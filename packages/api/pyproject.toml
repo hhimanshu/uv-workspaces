@@ -1,15 +1,29 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "API routes and mappings"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi",
-    "httpx",
-    "pytest"
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    # "app",  # Reference to your local app package
 ]
 
-[tool.poetry.scripts]
-start-server = "uvicorn main:app --reload"
-test = "pytest"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+    "watchfiles>=0.21.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src"
+]
