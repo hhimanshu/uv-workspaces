@@ -1,0 +1,67 @@
+name: Test Suite
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+# Cancel any in-progress job or run to save resources and ensure we're testing the latest code
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Enable colored output for better readability in CI logs
+  FORCE_COLOR: 1
+  # Configure pip to use uv for faster installations
+  PIP_USE_UV: 1
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30  # Prevent hanging jobs and ensure CI stays responsive
+
+    strategy:
+      # Continue testing other versions if one fails to get a complete picture of compatibility
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Use the project's setup script to ensure consistent development environment
+      - name: Setup development environment
+        run: python -m scripts.setup
+
+      # Run all tests using the project's test script
+      - name: Run tests
+        run: python -m scripts.test
+
+      # Upload test results for analysis and debugging
+      - name: Upload test results
+        if: always()  # Upload even if tests fail to help with debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            test-results.xml
+            pytest.log
+          retention-days: 30
