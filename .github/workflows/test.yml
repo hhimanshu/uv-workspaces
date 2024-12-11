@@ -2,9 +2,9 @@ name: Test Suite
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 # Cancel any in-progress job or run to save resources and ensure we're testing the latest code
 concurrency:
@@ -21,7 +21,7 @@ jobs:
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30  # Prevent hanging jobs and ensure CI stays responsive
+    timeout-minutes: 30 # Prevent hanging jobs and ensure CI stays responsive
 
     strategy:
       # Continue testing other versions if one fails to get a complete picture of compatibility
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning
+          fetch-depth: 0 # Fetch all history for proper versioning
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -47,9 +47,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Use the project's setup script to ensure consistent development environment
+      # Create virtual environment using uv
+      - name: Create virtual environment
+        run: |
+          uv venv
+          echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+
+      # Setup development environment in the activated virtual environment
       - name: Setup development environment
-        run: python -m scripts.setup
+        run: |
+          # The virtual environment is automatically activated because we added it to PATH
+          python -m scripts.setup
 
       # Run all tests using the project's test script
       - name: Run tests
@@ -57,7 +65,7 @@ jobs:
 
       # Upload test results for analysis and debugging
       - name: Upload test results
-        if: always()  # Upload even if tests fail to help with debugging
+        if: always() # Upload even if tests fail to help with debugging
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.python-version }}
