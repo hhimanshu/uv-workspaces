@@ -21,16 +21,10 @@ jobs:
     timeout-minutes: 30
 
     strategy:
-      fail-fast: false
+      fail-fast: false  # We keep this in case we add more matrix combinations later
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.12"]
-        include:
-          - os: ubuntu-latest
-            python-version: "3.13"
-            experimental: true
-
-    continue-on-error: ${{ matrix.experimental || false }}
+        python-version: ["3.13"]  # Only testing with Python 3.13 as per package requirements
 
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +40,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          allow-prereleases: ${{ matrix.experimental || false }}
+          allow-prereleases: true  # Python 3.13 might still need this for a while
 
       - name: Create and activate virtual environment
         run: |
