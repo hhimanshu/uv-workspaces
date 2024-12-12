@@ -101,7 +101,7 @@ jobs:
       - name: Combine test reports
         if: success() || failure()
         run: |
-          cat > combine_reports.py << 'EOL'
+          cat << 'EOL' > combine_reports.py
             import xml.etree.ElementTree as ET
             from pathlib import Path
             import sys
@@ -178,7 +178,18 @@ jobs:
                 combiner = JUnitReportCombiner()
                 combiner.combine_junit_reports('test-results/junit.xml')
             EOL
+
+                    # Add debug information
+                    echo "Current directory: $(pwd)"
+                    echo "Contents of test-results directory:"
+                    ls -la test-results/
+
+                    # Run the Python script
                     python combine_reports.py
+
+                    # Verify the output file was created
+                    echo "After combination - contents of test-results directory:"
+                    ls -la test-results/
 
       # Publish test results as a GitHub check run
       - name: Test Report
