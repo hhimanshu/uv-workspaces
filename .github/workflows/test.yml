@@ -1,106 +1,215 @@
-name: Prepare test environment
+name: Test Suite
 
-on: [push]
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+  PIP_USE_UV: 1
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.13"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Standard setup steps
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
-    - name: Create test results and scripts directories
-      run: |
-        mkdir -p test-results
-        mkdir -p scripts
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
-    - name: Create combine_reports.py script
-      run: |
-        tee scripts/combine_reports.py << 'SCRIPTEND'
-        import xml.etree.ElementTree as ET
-        from pathlib import Path
-        import sys
+      - name: Create and activate virtual environment
+        run: |
+          python_path=$(which python)
+          echo "Using Python from: $python_path"
+          python -m venv .venv
+          echo "VIRTUAL_ENV=${{ github.workspace }}/.venv" >> $GITHUB_ENV
+          echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
 
-        class JUnitReportCombiner:
-            def __init__(self):
-                self.total_tests = 0
-                self.total_failures = 0
-                self.total_errors = 0
-                self.total_skipped = 0
-                self.total_time = 0.0
+          echo "Python version:"
+          python --version
+          echo "Python path:"
+          which python
 
-            def combine_junit_reports(self, output_file):
-                root = ET.Element('testsuites')
-                test_results_dir = Path('test-results')
+      - name: Setup development environment
+        run: python -m scripts.setup
 
-                # First, process API tests
-                api_file = test_results_dir / 'api-junit.xml'
-                if api_file.exists():
-                    self.process_package_tests(api_file, root, 'api')
+      # Create directories and setup script - using your working version
+      - name: Create test results and scripts directories
+        run: |
+          mkdir -p test-results
+          mkdir -p scripts
 
-                # Then process App tests
-                app_file = test_results_dir / 'app-junit.xml'
-                if app_file.exists():
-                    self.process_package_tests(app_file, root, 'app')
+      - name: Create combine_reports.py script
+        run: |
+          tee scripts/combine_reports.py << 'SCRIPTEND'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          import sys
 
-                # Set aggregate statistics on root element
-                root.set('tests', str(self.total_tests))
-                root.set('failures', str(self.total_failures))
-                root.set('errors', str(self.total_errors))
-                root.set('skipped', str(self.total_skipped))
-                root.set('time', f"{self.total_time:.3f}")
+          class JUnitReportCombiner:
+              def __init__(self):
+                  self.total_tests = 0
+                  self.total_failures = 0
+                  self.total_errors = 0
+                  self.total_skipped = 0
+                  self.total_time = 0.0
 
-                # Write the combined report
-                tree = ET.ElementTree(root)
-                tree.write(output_file, encoding='utf-8', xml_declaration=True)
+              def combine_junit_reports(self, output_file):
+                  root = ET.Element('testsuites')
+                  test_results_dir = Path('test-results')
 
-            def process_package_tests(self, xml_file, root, package_name):
-                try:
-                    tree = ET.parse(xml_file)
-                    testsuite = tree.getroot()
+                  # First, process API tests
+                  api_file = test_results_dir / 'api-junit.xml'
+                  if api_file.exists():
+                      self.process_package_tests(api_file, root, 'api')
 
-                    # Handle both single testsuite and testsuites wrapper
-                    if testsuite.tag == 'testsuites':
-                        for suite in testsuite:
-                            self.process_suite(suite, root, package_name)
-                    else:
-                        self.process_suite(testsuite, root, package_name)
+                  # Then process App tests
+                  app_file = test_results_dir / 'app-junit.xml'
+                  if app_file.exists():
+                      self.process_package_tests(app_file, root, 'app')
 
-                except ET.ParseError as e:
-                    print(f"Warning: Could not parse {xml_file}: {e}", file=sys.stderr)
-                except Exception as e:
-                    print(f"Warning: Error processing {xml_file}: {e}", file=sys.stderr)
+                  # Set aggregate statistics on root element
+                  root.set('tests', str(self.total_tests))
+                  root.set('failures', str(self.total_failures))
+                  root.set('errors', str(self.total_errors))
+                  root.set('skipped', str(self.total_skipped))
+                  root.set('time', f"{self.total_time:.3f}")
 
-            def process_suite(self, suite, root, package_name):
-                # Get the original suite name, removing any existing package prefix
-                original_name = suite.get('name', 'unnamed')
-                if ' - ' in original_name:
-                    original_name = original_name.split(' - ', 1)[1]
+                  # Write the combined report
+                  tree = ET.ElementTree(root)
+                  tree.write(output_file, encoding='utf-8', xml_declaration=True)
 
-                # Set the new name with correct package prefix
-                suite.set('name', f"{package_name} - {original_name}")
+              def process_package_tests(self, xml_file, root, package_name):
+                  try:
+                      tree = ET.parse(xml_file)
+                      testsuite = tree.getroot()
 
-                # Update totals
-                self.total_tests += int(suite.get('tests', 0))
-                self.total_failures += int(suite.get('failures', 0))
-                self.total_errors += int(suite.get('errors', 0))
-                self.total_skipped += int(suite.get('skipped', 0))
-                self.total_time += float(suite.get('time', 0))
+                      # Handle both single testsuite and testsuites wrapper
+                      if testsuite.tag == 'testsuites':
+                          for suite in testsuite:
+                              self.process_suite(suite, root, package_name)
+                      else:
+                          self.process_suite(testsuite, root, package_name)
 
-                root.append(suite)
+                  except ET.ParseError as e:
+                      print(f"Warning: Could not parse {xml_file}: {e}", file=sys.stderr)
+                  except Exception as e:
+                      print(f"Warning: Error processing {xml_file}: {e}", file=sys.stderr)
 
-        if __name__ == '__main__':
-            combiner = JUnitReportCombiner()
-            combiner.combine_junit_reports('test-results/junit.xml')
-        SCRIPTEND
+              def process_suite(self, suite, root, package_name):
+                  # Get the original suite name, removing any existing package prefix
+                  original_name = suite.get('name', 'unnamed')
+                  if ' - ' in original_name:
+                      original_name = original_name.split(' - ', 1)[1]
 
-    - name: Verify combine_reports.py script
-      run: |
-        echo "Created combine_reports.py script:"
-        ls -l scripts/combine_reports.py
+                  # Set the new name with correct package prefix
+                  suite.set('name', f"{package_name} - {original_name}")
+
+                  # Update totals
+                  self.total_tests += int(suite.get('tests', 0))
+                  self.total_failures += int(suite.get('failures', 0))
+                  self.total_errors += int(suite.get('errors', 0))
+                  self.total_skipped += int(suite.get('skipped', 0))
+                  self.total_time += float(suite.get('time', 0))
+
+                  root.append(suite)
+
+          if __name__ == '__main__':
+              combiner = JUnitReportCombiner()
+              combiner.combine_junit_reports('test-results/junit.xml')
+          SCRIPTEND
+
+      # Run the actual tests
+      - name: Run API tests
+        id: api-tests
+        if: success() || failure()
+        run: |
+          echo "Running API tests..."
+          cd packages/api
+          python -m pytest tests/ \
+            --junitxml=../../test-results/api-junit.xml \
+            --log-file=../../test-results/api-pytest.log \
+            --verbose || true
+
+      - name: Run App tests
+        id: app-tests
+        if: success() || failure()
+        run: |
+          echo "Running App tests..."
+          cd packages/app
+          if [ -d "tests" ]; then
+            python -m pytest tests/ \
+              --junitxml=../../test-results/app-junit.xml \
+              --log-file=../../test-results/app-pytest.log \
+              --verbose
+          else
+            echo "No tests directory found in app package"
+            echo '<?xml version="1.0" encoding="utf-8"?>
+            <testsuites>
+            <testsuite name="app" errors="0" failures="0" skipped="0" tests="0" time="0.0">
+            </testsuite>
+            </testsuites>' > ../../test-results/app-junit.xml
+          fi
+
+      # Combine and report the results
+      - name: Combine test reports
+        if: success() || failure()
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents of test-results directory before combination:"
+          ls -la test-results/
+
+          echo "Running test combination script..."
+          python scripts/combine_reports.py
+
+          echo "Contents of test-results directory after combination:"
+          ls -la test-results/
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Python Test Results
+          path: test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: true
+          list-suites: "all"
+          list-tests: "all"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: test-results/
+          retention-days: 30
