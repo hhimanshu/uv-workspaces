@@ -13,8 +13,6 @@ concurrency:
 env:
   FORCE_COLOR: 1
   PIP_USE_UV: 1
-  # We configure pytest to generate JUnit XML in a specific format
-  PYTEST_ADDOPTS: "--junitxml=test-results/junit.xml --log-file=test-results/pytest.log"
 
 jobs:
   test:
@@ -64,34 +62,68 @@ jobs:
       - name: Setup development environment
         run: python -m scripts.setup
 
-      # Create test results directory and ensure it exists
       - name: Prepare test environment
-        run: |
-          mkdir -p test-results
-          echo "Created test results directory at: $(pwd)/test-results"
+        run: mkdir -p test-results
 
-      # Run tests and ensure the XML is generated
-      - name: Run tests
-        id: run-tests
+      # Run tests for each package separately and generate separate reports
+      - name: Run API tests
+        id: api-tests
+        if: success() || failure()
         run: |
-          python -m scripts.test
-          echo "Checking test results:"
-          ls -la test-results/ || true
-        continue-on-error: true
+          echo "Running API tests..."
+          cd packages/api
+          python -m pytest tests/ \
+            --junitxml=../../test-results/api-junit.xml \
+            --log-file=../../test-results/api-pytest.log
+
+      - name: Run App tests
+        id: app-tests
+        if: success() || failure()
+        run: |
+          echo "Running App tests..."
+          cd packages/app
+          if [ -d "tests" ]; then
+            python -m pytest tests/ \
+              --junitxml=../../test-results/app-junit.xml \
+              --log-file=../../test-results/app-pytest.log
+          else
+            echo "No tests directory found in app package"
+          fi
+
+      # Combine the test reports for better visualization
+      - name: Combine test reports
+        if: success() || failure()
+        run: |
+          echo '<?xml version="1.0" encoding="utf-8"?>' > test-results/junit.xml
+          echo '<testsuites>' >> test-results/junit.xml
+
+          # Add API test results if they exist
+          if [ -f "test-results/api-junit.xml" ]; then
+            sed -n '/<testsuite/,/<\/testsuite>/p' test-results/api-junit.xml | \
+              sed 's/<testsuite/<testsuite name="api"/g' >> test-results/junit.xml
+          fi
+
+          # Add App test results if they exist
+          if [ -f "test-results/app-junit.xml" ]; then
+            sed -n '/<testsuite/,/<\/testsuite>/p' test-results/app-junit.xml | \
+              sed 's/<testsuite/<testsuite name="app"/g' >> test-results/junit.xml
+          fi
+
+          echo '</testsuites>' >> test-results/junit.xml
 
       # Publish test results as a GitHub check run
       - name: Test Report
         uses: dorny/test-reporter@v1
-        if: success() || failure() # run this step even if previous step failed
+        if: success() || failure()
         with:
-          name: Python Test Results # Name of the check run which will be created
-          path: test-results/junit.xml # Path to test results
-          reporter: java-junit # Format of test results
-          fail-on-error: true # Fail the step if there are test failures
-          list-suites: "all" # List all test suites in the report
-          list-tests: "all" # List all test cases in the report
+          name: Python Test Results
+          path: test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: true
+          list-suites: "all"
+          list-tests: "all"
 
-      # Keep the artifact upload for detailed logs
+      # Upload all test artifacts for debugging
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
