@@ -61,7 +61,7 @@ jobs:
           which python
 
       - name: Setup development environment
-        run: python -m scripts.setup
+        run: python -m scripts.setup --extras dev
 
       # Create directories and setup script - using your working version
       - name: Create test results and scripts directories
@@ -159,7 +159,7 @@ jobs:
           python -m pytest . \
             --junitxml=../../test-results/api-junit.xml \
             --log-file=../../test-results/api-pytest.log \
-            -v || true
+            -v
 
       - name: Run App tests
         id: app-tests
@@ -170,7 +170,7 @@ jobs:
           python -m pytest . \
             --junitxml=../../test-results/app-junit.xml \
             --log-file=../../test-results/app-pytest.log \
-            -v || true
+            -v
 
       # Combine and report the results
       - name: Combine test reports
