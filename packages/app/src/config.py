@@ -22,7 +22,7 @@ def get_env(key: str, default: Any = None, required: bool = False) -> Optional[s
 
 def get_debug() -> bool:
     """Get DEBUG flag as boolean"""
-    return get_env('DEBUG', 'false').lower() in {'1', 'yes', 'true'}
+    return get_env("DEBUG", "false").lower() in {"1", "yes", "true"}
 
 
 def get_mongodb_url() -> str:
