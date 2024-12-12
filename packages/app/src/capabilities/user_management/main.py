@@ -3,13 +3,13 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from motor.motor_asyncio import AsyncIOMotorClient
 from ...models.user import User
-from ...config import get_mongodb_url, get_mongodb_db_name
+from ...config import get_mongodb_url, get_app_db_name
 
 
 class UserManagement:
     def __init__(self):
         mongodb_url = get_mongodb_url()
-        db_name = get_mongodb_db_name()
+        db_name = get_app_db_name()
 
         self.client = AsyncIOMotorClient(mongodb_url)
         self.db = self.client[db_name]

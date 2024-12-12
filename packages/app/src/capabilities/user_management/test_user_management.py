@@ -14,7 +14,7 @@ class TestUserManagement:
 
     @pytest.mark.asyncio
     async def test_create_user_success(self, user_management):
-        manager = await user_management
+        manager = user_management
 
         user = User(
             email="test@example.com", name="Test User", created_at=datetime.now(UTC)
@@ -29,7 +29,7 @@ class TestUserManagement:
 
     @pytest.mark.asyncio
     async def test_get_existing_user(self, user_management):
-        manager = await user_management
+        manager = user_management
 
         user = User(
             email="test@example.com", name="Test User", created_at=datetime.now(UTC)
@@ -42,6 +42,6 @@ class TestUserManagement:
 
     @pytest.mark.asyncio
     async def test_get_nonexistent_user(self, user_management):
-        manager = await user_management
+        manager = user_management
         retrieved_user = await manager.get_user("nonexistent_id")
         assert retrieved_user is None

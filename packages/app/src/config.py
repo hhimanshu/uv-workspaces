@@ -30,6 +30,6 @@ def get_mongodb_url() -> str:
     return get_env("MONGODB_URL", required=True)
 
 
-def get_mongodb_db_name() -> str:
+def get_app_db_name() -> str:
     """Get MongoDB database name"""
-    return get_env("MONGODB_DB_NAME", required=True)
+    return get_env("MONGODB_APP_DB_NAME", required=True)
