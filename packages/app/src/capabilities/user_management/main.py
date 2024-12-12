@@ -7,10 +7,9 @@ from ...config import get_mongodb_url, get_app_db_name
 
 
 class UserManagement:
-    def __init__(self):
-        mongodb_url = get_mongodb_url()
-        db_name = get_app_db_name()
-
+    def __init__(self, mongodb_url=None, db_name=None):
+        mongodb_url = mongodb_url or get_mongodb_url()
+        db_name = db_name or get_app_db_name()
         self.client = AsyncIOMotorClient(mongodb_url)
         self.db = self.client[db_name]
         self.collection = self.db.users
