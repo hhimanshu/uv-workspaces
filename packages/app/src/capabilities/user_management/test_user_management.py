@@ -15,7 +15,7 @@ class TestUserManagement:
     @pytest.fixture
     async def user_management(self, mongodb_container):
         mongodb_url = mongodb_container.get_connection_url()
-        manager = UserManagement(mongodb_url=mongodb_url)
+        manager = UserManagement(mongodb_url=mongodb_url, db_name="test_db")
         await manager.collection.delete_many({})
         return manager
 
