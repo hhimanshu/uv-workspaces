@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -28,5 +29,5 @@ class UserManagement:
                 user_dict["id"] = str(user_dict.pop("_id"))
                 return User(**user_dict)
         except InvalidId:
-            logging.error(f'InvalidId exception for user_id: {user_id}')
+            logging.error(f"InvalidId exception for user_id: {user_id}")
         return None
