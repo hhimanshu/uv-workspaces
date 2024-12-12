@@ -156,7 +156,7 @@ jobs:
         run: |
           echo "Running API tests..."
           cd packages/api
-          python -m pytest tests/ \
+          python -m pytest . \
             --junitxml=../../test-results/api-junit.xml \
             --log-file=../../test-results/api-pytest.log \
             --verbose || true
@@ -168,7 +168,7 @@ jobs:
           echo "Running App tests..."
           cd packages/app
           if [ -d "tests" ]; then
-            python -m pytest tests/ \
+            python -m pytest . \
               --junitxml=../../test-results/app-junit.xml \
               --log-file=../../test-results/app-pytest.log \
               --verbose
