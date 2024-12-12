@@ -102,11 +102,10 @@ jobs:
         if: success() || failure()
         run: |
           cat > combine_reports.py << 'EOL'
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-          import sys
+            import xml.etree.ElementTree as ET
+            from pathlib import Path
+            import sys
 
-          # ... rest of the imports remain the same ...
             class JUnitReportCombiner:
                 def __init__(self):
                     self.total_tests = 0
@@ -178,9 +177,8 @@ jobs:
             if __name__ == '__main__':
                 combiner = JUnitReportCombiner()
                 combiner.combine_junit_reports('test-results/junit.xml')
-          EOL
-
-          python combine_reports.py
+            EOL
+                    python combine_reports.py
 
       # Publish test results as a GitHub check run
       - name: Test Report
