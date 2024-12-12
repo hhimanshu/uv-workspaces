@@ -1,6 +1,7 @@
 import subprocess
 import os
 import sys
+from pathlib import Path
 
 
 def ensure_pre_commit_installed():
@@ -29,18 +30,17 @@ def install_workspace():
     Each package is installed separately to handle dependencies properly.
     """
     print("\nInstalling workspace packages...")
-    # workspace_root = Path(__file__).parent.parent
-    # api_dir = workspace_root / "packages" / "api"
-    # app_dir = workspace_root / "packages" / "app"
+    workspace_root = Path(__file__).parent.parent
+    api_dir = workspace_root / "packages" / "api"
+    app_dir = workspace_root / "packages" / "app"
 
-    subprocess.run(["uv", "sync"], check=True)
-    # if api_dir.exists():
-    #     print(f"\nInstalling {api_dir.name} package...")
-    #     subprocess.run(["uv", "pip", "install", "-e", f"{api_dir}[dev]"], check=True)
+    if api_dir.exists():
+        print(f"\nInstalling {api_dir.name} package...")
+        subprocess.run(["uv", "pip", "install", "-e", f"{api_dir}[dev]"], check=True)
 
-    # if app_dir.exists():
-    #     print(f"\nInstalling {app_dir.name} package...")
-    #     subprocess.run(["uv", "pip", "install", "-e", f"{app_dir}[dev]"], check=True)
+    if app_dir.exists():
+        print(f"\nInstalling {app_dir.name} package...")
+        subprocess.run(["uv", "pip", "install", "-e", f"{app_dir}[dev]"], check=True)
 
 
 def verify_environment():
