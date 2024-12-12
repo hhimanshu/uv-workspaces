@@ -86,13 +86,13 @@ class WorkspaceManager:
         await self.init_db_connection(workspace)
         print(f"{workspace} workspace database initialized")
 
-    # async def start_app(self) -> None:
-    #     """
-    #     Starts the app workspace. Database should be initialized separately.
-    #     This allows the app to connect to the database when needed.
-    #     """
-    #     # App startup logic here - no database initialization
-    #     print("App workspace started")
+    async def start_app(self) -> None:
+        """
+        Starts the app workspace. Database should be initialized separately.
+        This allows the app to connect to the database when needed.
+        """
+        # App startup logic here - no database initialization
+        print("App workspace started")
 
     def start_api(self) -> None:
         """Starts the FastAPI server"""
