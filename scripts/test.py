@@ -21,7 +21,7 @@ def run_tests(package=None):
 
     def run_package_tests(pkg_path: Path):
         """Run tests for a specific package directory"""
-        print(f"\nRunning tests for {pkg_path.name}...")
+        print(f"\nRunning tests for [{pkg_path.name}] ...")
 
         # We use pytest's default test discovery - it will automatically find
         # test_*.py and *_test.py files

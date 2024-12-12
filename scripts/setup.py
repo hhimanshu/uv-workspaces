@@ -51,7 +51,7 @@ def verify_environment():
     if "VIRTUAL_ENV" not in os.environ:
         print("Error: Virtual environment not activated.")
         print("Please activate your virtual environment first:")
-        print("  source .venv/bin/activate")
+        print("source .venv/bin/activate")
         sys.exit(1)
 
 
