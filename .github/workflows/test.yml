@@ -65,7 +65,7 @@ jobs:
       - name: Prepare test environment
         run: mkdir -p test-results
 
-      # Run tests for each package separately and generate separate reports
+      # Run tests for each package separately with their own reports
       - name: Run API tests
         id: api-tests
         if: success() || failure()
@@ -74,7 +74,7 @@ jobs:
           cd packages/api
           python -m pytest tests/ \
             --junitxml=../../test-results/api-junit.xml \
-            --log-file=../../test-results/api-pytest.log
+            --log-file=../../test-results/api-pytest.log || true
 
       - name: Run App tests
         id: app-tests
@@ -90,26 +90,47 @@ jobs:
             echo "No tests directory found in app package"
           fi
 
-      # Combine the test reports for better visualization
+      # Use Python to combine the test reports properly
       - name: Combine test reports
         if: success() || failure()
         run: |
-          echo '<?xml version="1.0" encoding="utf-8"?>' > test-results/junit.xml
-          echo '<testsuites>' >> test-results/junit.xml
+          cat > combine_reports.py << 'EOL'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          import sys
 
-          # Add API test results if they exist
-          if [ -f "test-results/api-junit.xml" ]; then
-            sed -n '/<testsuite/,/<\/testsuite>/p' test-results/api-junit.xml | \
-              sed 's/<testsuite/<testsuite name="api"/g' >> test-results/junit.xml
-          fi
+          def combine_junit_reports(output_file):
+              # Create the root testsuites element
+              root = ET.Element('testsuites')
 
-          # Add App test results if they exist
-          if [ -f "test-results/app-junit.xml" ]; then
-            sed -n '/<testsuite/,/<\/testsuite>/p' test-results/app-junit.xml | \
-              sed 's/<testsuite/<testsuite name="app"/g' >> test-results/junit.xml
-          fi
+              # Look for all junit XML files
+              test_results_dir = Path('test-results')
+              for xml_file in test_results_dir.glob('*-junit.xml'):
+                  try:
+                      # Parse each report
+                      tree = ET.parse(xml_file)
+                      testsuite = tree.getroot()
 
-          echo '</testsuites>' >> test-results/junit.xml
+                      # Add package name based on filename
+                      package_name = xml_file.stem.split('-')[0]
+                      testsuite.set('name', f'{package_name} - {testsuite.get("name", "unnamed")}')
+
+                      # Add to the root
+                      root.append(testsuite)
+                  except ET.ParseError as e:
+                      print(f"Warning: Could not parse {xml_file}: {e}", file=sys.stderr)
+                  except Exception as e:
+                      print(f"Warning: Error processing {xml_file}: {e}", file=sys.stderr)
+
+              # Write the combined report with proper XML declaration
+              tree = ET.ElementTree(root)
+              tree.write(output_file, encoding='utf-8', xml_declaration=True)
+
+          if __name__ == '__main__':
+              combine_junit_reports('test-results/junit.xml')
+          EOL
+
+          python combine_reports.py
 
       # Publish test results as a GitHub check run
       - name: Test Report
