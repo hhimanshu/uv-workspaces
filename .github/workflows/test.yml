@@ -106,59 +106,78 @@ jobs:
           from pathlib import Path
           import sys
 
-          class JUnitReportCombiner:
-              def __init__(self):
-                  self.total_tests = 0
-                  self.total_failures = 0
-                  self.total_errors = 0
-                  self.total_skipped = 0
-                  self.total_time = 0.0
+          # ... rest of the imports remain the same ...
+            class JUnitReportCombiner:
+                def __init__(self):
+                    self.total_tests = 0
+                    self.total_failures = 0
+                    self.total_errors = 0
+                    self.total_skipped = 0
+                    self.total_time = 0.0
 
-              def combine_junit_reports(self, output_file):
-                  root = ET.Element('testsuites')
-                  test_results_dir = Path('test-results')
-                  for xml_file in test_results_dir.glob('*-junit.xml'):
-                      try:
-                          tree = ET.parse(xml_file)
-                          testsuite = tree.getroot()
-                          if testsuite.tag == 'testsuites':
-                              for suite in testsuite:
-                                  self.process_suite(suite, root)
-                          else:
-                              self.process_suite(testsuite, root)
-                      except ET.ParseError as e:
-                          print(f"Warning: Could not parse {xml_file}: {e}", file=sys.stderr)
-                          continue
-                      except Exception as e:
-                          print(f"Warning: Error processing {xml_file}: {e}", file=sys.stderr)
-                          continue
+                def combine_junit_reports(self, output_file):
+                    root = ET.Element('testsuites')
+                    test_results_dir = Path('test-results')
 
-                  root.set('tests', str(self.total_tests))
-                  root.set('failures', str(self.total_failures))
-                  root.set('errors', str(self.total_errors))
-                  root.set('skipped', str(self.total_skipped))
-                  root.set('time', f"{self.total_time:.3f}")
+                    # First, process API tests
+                    api_file = test_results_dir / 'api-junit.xml'
+                    if api_file.exists():
+                        self.process_package_tests(api_file, root, 'api')
 
-                  tree = ET.ElementTree(root)
-                  tree.write(output_file, encoding='utf-8', xml_declaration=True)
+                    # Then process App tests
+                    app_file = test_results_dir / 'app-junit.xml'
+                    if app_file.exists():
+                        self.process_package_tests(app_file, root, 'app')
 
-              def process_suite(self, suite, root):
-                  suite_name = suite.get('name', 'unnamed')
-                  if not suite_name.startswith(('api - ', 'app - ')):
-                      package_name = 'api' if 'api' in suite_name.lower() else 'app'
-                      suite.set('name', f'{package_name} - {suite_name}')
+                    # Set aggregate statistics on root element
+                    root.set('tests', str(self.total_tests))
+                    root.set('failures', str(self.total_failures))
+                    root.set('errors', str(self.total_errors))
+                    root.set('skipped', str(self.total_skipped))
+                    root.set('time', f"{self.total_time:.3f}")
 
-                  self.total_tests += int(suite.get('tests', 0))
-                  self.total_failures += int(suite.get('failures', 0))
-                  self.total_errors += int(suite.get('errors', 0))
-                  self.total_skipped += int(suite.get('skipped', 0))
-                  self.total_time += float(suite.get('time', 0))
+                    # Write the combined report
+                    tree = ET.ElementTree(root)
+                    tree.write(output_file, encoding='utf-8', xml_declaration=True)
 
-                  root.append(suite)
+                def process_package_tests(self, xml_file, root, package_name):
+                    try:
+                        tree = ET.parse(xml_file)
+                        testsuite = tree.getroot()
 
-          if __name__ == '__main__':
-              combiner = JUnitReportCombiner()
-              combiner.combine_junit_reports('test-results/junit.xml')
+                        # Handle both single testsuite and testsuites wrapper
+                        if testsuite.tag == 'testsuites':
+                            for suite in testsuite:
+                                self.process_suite(suite, root, package_name)
+                        else:
+                            self.process_suite(testsuite, root, package_name)
+
+                    except ET.ParseError as e:
+                        print(f"Warning: Could not parse {xml_file}: {e}", file=sys.stderr)
+                    except Exception as e:
+                        print(f"Warning: Error processing {xml_file}: {e}", file=sys.stderr)
+
+                def process_suite(self, suite, root, package_name):
+                    # Get the original suite name, removing any existing package prefix
+                    original_name = suite.get('name', 'unnamed')
+                    if ' - ' in original_name:
+                        original_name = original_name.split(' - ', 1)[1]
+
+                    # Set the new name with correct package prefix
+                    suite.set('name', f"{package_name} - {original_name}")
+
+                    # Update totals
+                    self.total_tests += int(suite.get('tests', 0))
+                    self.total_failures += int(suite.get('failures', 0))
+                    self.total_errors += int(suite.get('errors', 0))
+                    self.total_skipped += int(suite.get('skipped', 0))
+                    self.total_time += float(suite.get('time', 0))
+
+                    root.append(suite)
+
+            if __name__ == '__main__':
+                combiner = JUnitReportCombiner()
+                combiner.combine_junit_reports('test-results/junit.xml')
           EOL
 
           python combine_reports.py
