@@ -1,8 +1,8 @@
 from datetime import UTC, datetime
 from typing import Optional
-from typeid import TypeID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from typeid import TypeID
 
 
 class BaseDocument(BaseModel):
@@ -17,3 +17,5 @@ class BaseDocument(BaseModel):
     @classmethod
     def get_indexes(cls) -> list:
         return []
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)

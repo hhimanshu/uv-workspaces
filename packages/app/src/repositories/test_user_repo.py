@@ -1,7 +1,7 @@
-from typeid import TypeID
 import pytest
 from faker import Faker
 from testcontainers.mongodb import MongoDbContainer
+from typeid import TypeID
 
 from ..models.user import User
 from .user_repo import UserRepository

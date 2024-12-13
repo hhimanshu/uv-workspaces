@@ -1,6 +1,7 @@
 # src/repositories/user_repository.py
 from datetime import UTC, datetime
 from typing import List, Optional
+
 from typeid import TypeID
 
 from ..models.user import User
