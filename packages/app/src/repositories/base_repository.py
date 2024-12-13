@@ -1,4 +1,3 @@
-# src/repositories/base_repository.py
 from typing import Generic, List, Optional, TypeVar
 from uuid import UUID
 

@@ -5,7 +5,7 @@ from .base_model import BaseDocument
 
 class User(BaseDocument):
     name: str = Field(..., min_length=1)
-    email: EmailStr
+    email: EmailStr = Field(..., json_schema_extra={"unique": True})
 
     @classmethod
     def get_collection_name(cls) -> str:

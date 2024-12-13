@@ -1,4 +1,3 @@
-# src/repositories/test_user_repository.py
 from uuid import uuid4
 
 import pytest
