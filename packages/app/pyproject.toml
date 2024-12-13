@@ -42,3 +42,6 @@ markers = [
     "unit: marks unit tests",
     "db: marks database tests"
 ]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C", "N", "B", "I"]

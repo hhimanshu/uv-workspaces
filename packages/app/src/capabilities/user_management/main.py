@@ -1,10 +1,11 @@
-import logging
 from typing import Optional
+
 from bson import ObjectId
 from bson.errors import InvalidId
 from motor.motor_asyncio import AsyncIOMotorClient
-from ...models.user import User
-from ...config import get_mongodb_url, get_app_db_name
+
+from ...config import get_app_db_name, get_mongodb_url
+from ...models.auser import User
 
 
 class UserManagement:
@@ -29,5 +30,5 @@ class UserManagement:
                 user_dict["id"] = str(user_dict.pop("_id"))
                 return User(**user_dict)
         except InvalidId:
-            logging.error(f"InvalidId exception for user_id: {user_id}")
+            pass
         return None
