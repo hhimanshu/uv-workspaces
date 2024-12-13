@@ -1,10 +1,11 @@
-import logging
 from typing import Optional
+
 from bson import ObjectId
 from bson.errors import InvalidId
 from motor.motor_asyncio import AsyncIOMotorClient
-from ...models.user import User
-from ...config import get_mongodb_url, get_app_db_name
+
+from ...config import get_app_db_name, get_mongodb_url
+from ...models.auser import AUser
 
 
 class UserManagement:
@@ -15,19 +16,19 @@ class UserManagement:
         self.db = self.client[db_name]
         self.collection = self.db.users
 
-    async def create_user(self, user: User) -> User:
+    async def create_user(self, user: AUser) -> AUser:
         user_dict = user.model_dump()
         user_dict.pop("id", None)
         result = await self.collection.insert_one(user_dict)
         user.id = str(result.inserted_id)
         return user
 
-    async def get_user(self, user_id: str) -> Optional[User]:
+    async def get_user(self, user_id: str) -> Optional[AUser]:
         try:
             user_dict = await self.collection.find_one({"_id": ObjectId(user_id)})
             if user_dict:
                 user_dict["id"] = str(user_dict.pop("_id"))
-                return User(**user_dict)
+                return AUser(**user_dict)
         except InvalidId:
-            logging.error(f"InvalidId exception for user_id: {user_id}")
+            pass
         return None

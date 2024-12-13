@@ -1,8 +1,10 @@
-from bson import ObjectId
-import pytest
 from datetime import UTC, datetime
+
+import pytest
+from bson import ObjectId
 from testcontainers.mongodb import MongoDbContainer
-from ...models.user import User
+
+from ...models.auser import AUser
 from .main import UserManagement
 
 
@@ -23,7 +25,7 @@ class TestUserManagement:
     async def test_create_user_success(self, user_management):
         manager = user_management
 
-        user = User(
+        user = AUser(
             email="test@example.com", name="Test User", created_at=datetime.now(UTC)
         )
 
@@ -38,7 +40,7 @@ class TestUserManagement:
     async def test_get_existing_user(self, user_management):
         manager = user_management
 
-        user = User(
+        user = AUser(
             email="test@example.com", name="Test User", created_at=datetime.now(UTC)
         )
         created_user = await manager.create_user(user)

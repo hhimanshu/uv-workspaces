@@ -1,23 +1,16 @@
-from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from pydantic import EmailStr, Field
+
+from .base_model import BaseDocument
 
 
-class User(BaseModel):
-    """User model with basic information"""
+class User(BaseDocument):
+    name: str = Field(..., min_length=1)
+    email: EmailStr = Field(..., json_schema_extra={"unique": True})
 
-    id: Optional[str] = Field(default=None, description="User ID")
-    email: EmailStr = Field(..., description="User email address")
-    name: str = Field(..., description="User full name")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    is_active: bool = Field(default=True)
+    @classmethod
+    def get_collection_name(cls) -> str:
+        return "users"
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "email": "user@example.com",
-                "name": "John Doe",
-                "is_active": True,
-            }
-        }
-    )
+    @classmethod
+    def get_indexes(cls) -> list:
+        return [[("id", 1)], [("email", 1)], [("created_at", -1)]]

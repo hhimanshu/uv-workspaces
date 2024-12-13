@@ -14,5 +14,5 @@ repos:
     rev: v0.8.2  # Matching your dependency version
     hooks:
       - id: ruff
-        args: [--fix]
+        args: ["--fix"]
       - id: ruff-format
