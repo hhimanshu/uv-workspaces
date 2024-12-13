@@ -1,5 +1,4 @@
-from uuid import uuid4
-
+from typeid import TypeID
 import pytest
 from faker import Faker
 from testcontainers.mongodb import MongoDbContainer
@@ -66,6 +65,6 @@ class TestUserRepository:
 
     @pytest.mark.asyncio
     async def test_nonexistent_user(self, user_repository):
-        random_id = uuid4()
+        random_id = TypeID()
         user = await user_repository.get_by_id(random_id)
         assert user is None

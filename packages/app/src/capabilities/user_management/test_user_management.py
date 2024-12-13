@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from bson import ObjectId
+from typeid import TypeID
 from testcontainers.mongodb import MongoDbContainer
 
 from ...models.auser import AUser
@@ -32,8 +32,8 @@ class TestUserManagement:
         created_user = await manager.create_user(user)
         assert created_user.id is not None
 
-        # Use ObjectId for lookup
-        db_user = await manager.collection.find_one({"_id": ObjectId(created_user.id)})
+        # Use TypeID for lookup
+        db_user = await manager.collection.find_one({"_id": TypeID.from_string(created_user.id)})
         assert db_user is not None
 
     @pytest.mark.asyncio
@@ -52,5 +52,5 @@ class TestUserManagement:
     @pytest.mark.asyncio
     async def test_get_nonexistent_user(self, user_management):
         manager = user_management
-        retrieved_user = await manager.get_user("nonexistent_id")
+        retrieved_user = await manager.get_user(str(TypeID()))
         assert retrieved_user is None

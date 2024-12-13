@@ -1,5 +1,5 @@
 from typing import Generic, List, Optional, TypeVar
-from uuid import UUID
+from typeid import TypeID
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -24,7 +24,7 @@ class BaseRepository(Generic[T]):
         await self.collection.insert_one(doc_dict)
         return document
 
-    async def get_by_id(self, id: UUID) -> Optional[T]:
+    async def get_by_id(self, id: TypeID) -> Optional[T]:
         doc = await self.collection.find_one({"id": id})
         return self.model_class(**doc) if doc else None
 
@@ -36,12 +36,12 @@ class BaseRepository(Generic[T]):
         cursor = self.collection.find(query).skip(skip).limit(limit)
         return [self.model_class(**doc) async for doc in cursor]
 
-    async def update(self, id: UUID, update_dict: dict) -> Optional[T]:
+    async def update(self, id: TypeID, update_dict: dict) -> Optional[T]:
         result = await self.collection.find_one_and_update(
             {"id": id}, {"$set": update_dict}, return_document=True
         )
         return self.model_class(**result) if result else None
 
-    async def delete(self, id: UUID) -> bool:
+    async def delete(self, id: TypeID) -> bool:
         result = await self.collection.delete_one({"id": id})
         return result.deleted_count > 0
