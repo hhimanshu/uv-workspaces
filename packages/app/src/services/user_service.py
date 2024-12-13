@@ -2,7 +2,7 @@
 from typing import List
 
 from ..exceptions.user_errors import DuplicateEmailError, UserNotFoundError
-from ..models.user import AUser
+from ..models.user import User
 from ..repositories.user_repo import UserRepository
 
 
@@ -10,7 +10,7 @@ class UserService:
     def __init__(self, user_repository: UserRepository):
         self._repository = user_repository
 
-    async def create_user(self, user: AUser) -> AUser:
+    async def create_user(self, user: User) -> User:
         # Check if email already exists
         existing_user = await self._repository.find_by_email(user.email)
         if existing_user:
@@ -18,16 +18,16 @@ class UserService:
 
         return await self._repository.create(user)
 
-    async def get_user(self, user_id: str) -> AUser:
+    async def get_user(self, user_id: str) -> User:
         user = await self._repository.find_by_id(user_id)
         if not user:
             raise UserNotFoundError(f"User with id {user_id} not found")
         return user
 
-    async def get_users(self) -> List[AUser]:
+    async def get_users(self) -> List[User]:
         return await self._repository.find_all()
 
-    async def update_user(self, user_id: str, user_update: AUser) -> AUser:
+    async def update_user(self, user_id: str, user_update: User) -> User:
         # Check if user exists
         existing_user = await self.get_user(user_id)
 
@@ -49,5 +49,5 @@ class UserService:
         await self.get_user(user_id)
         return await self._repository.delete(user_id)
 
-    async def get_active_users(self) -> List[AUser]:
+    async def get_active_users(self) -> List[User]:
         return await self._repository.find_active_users()

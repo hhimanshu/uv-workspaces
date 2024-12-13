@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from .base import BaseDocument
 
@@ -26,7 +26,7 @@ class Phone(BaseModel):
     is_primary: bool = Field(default=False)
 
 
-class AUser(BaseDocument):
+class User(BaseDocument):
     first_name: str = Field(..., min_length=1)
     last_name: str = Field(..., min_length=1)
     email: EmailStr = Field(...)
@@ -34,13 +34,11 @@ class AUser(BaseDocument):
     phones: List[Phone] = Field(default_factory=list)
     is_active: bool = Field(default=True)
 
-    class Config:
-        collection_name = "users"  # This defines the MongoDB collection name
-        indexes = [
-            {
-                "fields": ["email"],
-                "unique": True,
-            },  # Ensure email uniqueness at database level
-            {"fields": ["created_at"]},  # Index for timestamp-based queries
-            {"fields": ["is_active"]},  # Index for active user queries
-        ]
+    model_config = ConfigDict(
+        collection_name="users",
+        indexes=[
+            {"fields": ["email"], "unique": True},
+            {"fields": ["created_at"]},
+            {"fields": ["is_active"]},
+        ],
+    )

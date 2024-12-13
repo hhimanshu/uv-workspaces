@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
-class User(BaseModel):
+class AUser(BaseModel):
     """User model with basic information"""
 
     id: Optional[str] = Field(default=None, description="User ID")
@@ -13,13 +13,11 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = Field(default=True)
 
-    class Config:
-        collection_name = "management_users"  # This defines the MongoDB collection name
-        indexes = [
-            {
-                "fields": ["email"],
-                "unique": True,
-            },  # Ensure email uniqueness at database level
-            {"fields": ["created_at"]},  # Index for timestamp-based queries
-            {"fields": ["is_active"]},  # Index for active user queries
-        ]
+    model_config = ConfigDict(
+        collection_name="management_users",
+        indexes=[
+            {"fields": ["email"], "unique": True},
+            {"fields": ["created_at"]},
+            {"fields": ["is_active"]},
+        ],
+    )
