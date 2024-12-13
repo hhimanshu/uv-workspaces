@@ -2,15 +2,22 @@ from datetime import UTC, datetime
 
 import pytest
 from bson import ObjectId
+from testcontainers.mongodb import MongoDbContainer
 
 from ...models.auser import AUser
 from .main import UserManagement
 
 
 class TestUserManagement:
+    @pytest.fixture(scope="session")
+    def mongodb_container(self):
+        with MongoDbContainer() as mongo:
+            yield mongo
+
     @pytest.fixture
-    async def user_management(self):
-        manager = UserManagement()
+    async def user_management(self, mongodb_container):
+        mongodb_url = mongodb_container.get_connection_url()
+        manager = UserManagement(mongodb_url=mongodb_url, db_name="test_db")
         await manager.collection.delete_many({})
         return manager
 
