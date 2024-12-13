@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 from faker import Faker
 from testcontainers.mongodb import MongoDbContainer
@@ -8,10 +10,15 @@ from .user_repo import UserRepository
 
 fake = Faker()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class TestUserRepository:
     @pytest.fixture(scope="session")
     def mongodb_container(self):
+        logger.info("Starting MongoDB test container")
         with MongoDbContainer() as mongo:
             yield mongo
 
