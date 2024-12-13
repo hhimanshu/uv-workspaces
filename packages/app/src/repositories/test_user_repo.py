@@ -20,7 +20,6 @@ class TestUserRepository:
         mongodb_url = mongodb_container.get_connection_url()
         repo = UserRepository(mongodb_url=mongodb_url, db_name="test_db")
         await repo.collection.delete_many({})
-        await repo.initialize()
         return repo
 
     @pytest.mark.asyncio
