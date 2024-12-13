@@ -28,8 +28,14 @@ class TestUserRepository:
         created_user = await user_repository.create_user(user)
 
         assert created_user.id is not None
+        created_id_as_str = str(created_user.id)
+        assert created_id_as_str.startswith("user")
+
         retrieved_user = await user_repository.get_by_id(created_user.id)
         assert retrieved_user is not None
+
+        retrieved_id_as_str = str(retrieved_user.id)
+        assert retrieved_id_as_str == created_id_as_str
         assert retrieved_user.email == user.email
 
     @pytest.mark.asyncio
