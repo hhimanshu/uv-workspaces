@@ -4,8 +4,8 @@ This workspace contains the core business logic and capabilities of our applicat
 
 ## Structure
 - `src/models/`: Pydantic models for data validation
-- `src/capabilities/`: Business logic organized by capability
-- `src/config.py`: Environment configuration management
+- `src/repositories/`: Data access layer
+- `src/services/`: Business logic services
 
 ## Getting Started
 1. Copy `.env.example` to `.env` and update values

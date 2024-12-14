@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Generic, List, Optional, TypeVar
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -5,11 +6,11 @@ from typeid import TypeID
 
 from ..models.base_model import BaseDocument
 
-T = TypeVar("T", bound=BaseDocument)
+D = TypeVar("D", bound=BaseDocument)
 
 
-class BaseRepository(Generic[T]):
-    def __init__(self, mongodb_url: str, db_name: str, model_class: type[T]):
+class BaseRepository(Generic[D]):
+    def __init__(self, mongodb_url: str, db_name: str, model_class: type[D]):
         self.client = AsyncIOMotorClient(mongodb_url)
         self.db = self.client[db_name]
         self.model_class = model_class
@@ -22,14 +23,14 @@ class BaseRepository(Generic[T]):
                 await self.collection.create_index(index)
             self._initialized = True
 
-    async def create(self, document: T) -> T:
+    async def create(self, document: D) -> D:
         await self.initialize()  # Ensure initialization
         doc_dict = document.model_dump()
         doc_dict["id"] = str(doc_dict["id"])  # Convert TypeID to string
         await self.collection.insert_one(doc_dict)
         return document
 
-    async def get_by_id(self, id: TypeID) -> Optional[T]:
+    async def get_by_id(self, id: TypeID) -> Optional[D]:
         await self.initialize()  # Ensure initialization
         doc = await self.collection.find_one(
             {"id": str(id)}
@@ -38,14 +39,14 @@ class BaseRepository(Generic[T]):
             doc["id"] = TypeID.from_string(doc["id"])  # Convert string back to TypeID
         return self.model_class(**doc) if doc else None
 
-    async def find_one(self, query: dict) -> Optional[T]:
+    async def find_one(self, query: dict) -> Optional[D]:
         await self.initialize()  # Ensure initialization
         doc = await self.collection.find_one(query)
         if doc and "id" in doc:
             doc["id"] = TypeID.from_string(doc["id"])  # Convert string back to TypeID
         return self.model_class(**doc) if doc else None
 
-    async def find_many(self, query: dict, skip: int = 0, limit: int = 100) -> List[T]:
+    async def find_many(self, query: dict, skip: int = 0, limit: int = 100) -> List[D]:
         await self.initialize()  # Ensure initialization
         cursor = self.collection.find(query).skip(skip).limit(limit)
         results = []
@@ -57,8 +58,10 @@ class BaseRepository(Generic[T]):
             results.append(self.model_class(**doc))
         return results
 
-    async def update(self, id: TypeID, update_dict: dict) -> Optional[T]:
+    async def update(self, id: TypeID, update_dict: dict) -> Optional[D]:
         await self.initialize()  # Ensure initialization
+
+        update_dict["updated_at"] = datetime.now(UTC)
         result = await self.collection.find_one_and_update(
             {"id": str(id)},
             {"$set": update_dict},

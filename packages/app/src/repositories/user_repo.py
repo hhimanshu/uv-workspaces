@@ -29,3 +29,6 @@ class UserRepository(BaseRepository[User]):
             raise ValueError(f"User with email {user.email} already exists")
         user.id = TypeID(prefix="user")
         return await self.create(user)
+
+    async def get_by_email(self, email: str) -> Optional[User]:
+        return await self.find_one({"email": email})
