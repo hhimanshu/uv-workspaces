@@ -7,7 +7,7 @@ from ..models.base_model import BaseDocument
 from ..repositories.base_repository import BaseRepository
 
 Doc = TypeVar("Doc", bound=BaseDocument)
-Res = TypeVar("Res", bound=BaseModel)  # R represents the response model
+Res = TypeVar("Res", bound=BaseModel)
 Repo = TypeVar("RepoType", bound=BaseRepository[Doc])
 
 

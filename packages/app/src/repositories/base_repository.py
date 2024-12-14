@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Generic, List, Optional, TypeVar
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -59,6 +60,8 @@ class BaseRepository(Generic[D]):
 
     async def update(self, id: TypeID, update_dict: dict) -> Optional[D]:
         await self.initialize()  # Ensure initialization
+
+        update_dict["updated_at"] = datetime.now(UTC)
         result = await self.collection.find_one_and_update(
             {"id": str(id)},
             {"$set": update_dict},
