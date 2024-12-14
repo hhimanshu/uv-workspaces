@@ -1,6 +1,6 @@
 [project]
 name = "app"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -17,7 +17,7 @@ dependencies = [
 dev = [
     "pytest>=8.3.4",
     "pytest-asyncio>=0.24.0",
-    "testcontainers>=3.7.1",
+    "testcontainers>=4.9.0",
     "testcontainers-mongodb>=0.0.1rc1",
 ]
 
