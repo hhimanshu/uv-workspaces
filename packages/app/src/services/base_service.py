@@ -1,4 +1,3 @@
-# src/services/base_service.py
 from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel
@@ -7,15 +6,15 @@ from typeid import TypeID
 from ..models.base_model import BaseDocument
 from ..repositories.base_repository import BaseRepository
 
-T = TypeVar("T", bound=BaseDocument)
-R = TypeVar("R", bound=BaseModel)
+D = TypeVar("D", bound=BaseDocument)
+R = TypeVar("R", bound=BaseModel)  # R represents the response model
 
 
-class BaseService(Generic[T, R]):
-    def __init__(self, repository: BaseRepository[T]):
+class BaseService(Generic[D, R]):
+    def __init__(self, repository: BaseRepository[D]):
         self.repository = repository
 
-    def _to_response(self, model: T) -> R:
+    def _to_response(self, model: D) -> R:
         raise NotImplementedError
 
     async def get_by_id(self, id: TypeID) -> Optional[R]:
