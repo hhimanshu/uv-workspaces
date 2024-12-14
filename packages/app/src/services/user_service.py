@@ -1,53 +1,45 @@
-# app/src/capabilities/user_management/services/user_service.py
-from typing import List
+# src/services/user_service.py
+from datetime import UTC, datetime
+from typing import Optional
 
-from ..exceptions.user_errors import DuplicateEmailError, UserNotFoundError
+from typeid import TypeID
+
+from ..dto.user_dto import CreateUserRequest, UpdateUserRequest, UserResponse
 from ..models.user import User
-from ..repositories.user_repo import UserRepository
+from ..repositories.base_repository import BaseRepository
+from .base_service import BaseService
 
 
-class UserService:
-    def __init__(self, user_repository: UserRepository):
-        self._repository = user_repository
+class UserService(BaseService[User, UserResponse]):
+    def __init__(self, repository: BaseRepository[User]):
+        super().__init__(repository)
 
-    async def create_user(self, user: User) -> User:
-        # Check if email already exists
-        existing_user = await self._repository.find_by_email(user.email)
-        if existing_user:
-            raise DuplicateEmailError(f"User with email {user.email} already exists")
+    def _to_response(self, user: User) -> UserResponse:
+        return UserResponse(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
-        return await self._repository.create(user)
+    async def create_user(self, user_request: CreateUserRequest) -> UserResponse:
+        user = User(
+            id=TypeID(prefix="user"), name=user_request.name, email=user_request.email
+        )
+        created_user = await self.repository.create(user)
+        return self._to_response(created_user)
 
-    async def get_user(self, user_id: str) -> User:
-        user = await self._repository.find_by_id(user_id)
-        if not user:
-            raise UserNotFoundError(f"User with id {user_id} not found")
-        return user
+    async def update_user(
+        self, id: TypeID, update_request: UpdateUserRequest
+    ) -> Optional[UserResponse]:
+        update_dict = update_request.model_dump(exclude_unset=True)
+        if update_dict:
+            update_dict["updated_at"] = datetime.now(UTC)
+            user = await self.repository.update(id, update_dict)
+            return self._to_response(user) if user else None
+        return await self.get_by_id(id)
 
-    async def get_users(self) -> List[User]:
-        return await self._repository.find_all()
-
-    async def update_user(self, user_id: str, user_update: User) -> User:
-        # Check if user exists
-        existing_user = await self.get_user(user_id)
-
-        # If email is being changed, check for duplicates
-        if user_update.email != existing_user.email:
-            email_user = await self._repository.find_by_email(user_update.email)
-            if email_user:
-                raise DuplicateEmailError(
-                    f"User with email {user_update.email} already exists"
-                )
-
-        updated_user = await self._repository.update(user_id, user_update)
-        if not updated_user:
-            raise UserNotFoundError(f"User with id {user_id} not found")
-        return updated_user
-
-    async def delete_user(self, user_id: str) -> bool:
-        # Check if user exists
-        await self.get_user(user_id)
-        return await self._repository.delete(user_id)
-
-    async def get_active_users(self) -> List[User]:
-        return await self._repository.find_active_users()
+    async def find_by_email(self, email: str) -> Optional[UserResponse]:
+        user = await self.repository.find_one({"email": email})
+        return self._to_response(user) if user else None
