@@ -6,19 +6,19 @@ from typeid import TypeID
 from ..models.base_model import BaseDocument
 from ..repositories.base_repository import BaseRepository
 
-D = TypeVar("D", bound=BaseDocument)
-R = TypeVar("R", bound=BaseModel)  # R represents the response model
-RepoType = TypeVar("RepoType", bound=BaseRepository[D])
+Doc = TypeVar("Doc", bound=BaseDocument)
+Res = TypeVar("Res", bound=BaseModel)  # R represents the response model
+Repo = TypeVar("RepoType", bound=BaseRepository[Doc])
 
 
-class BaseService(Generic[D, R, RepoType]):
-    def __init__(self, repository: RepoType):
+class BaseService(Generic[Doc, Repo, Res]):
+    def __init__(self, repository: Repo):
         self.repository = repository
 
-    def _to_response(self, doc: D) -> R:
+    def _to_response(self, doc: Doc) -> Res:
         raise NotImplementedError
 
-    async def get_by_id(self, id: TypeID) -> Optional[R]:
+    async def get_by_id(self, id: TypeID) -> Optional[Res]:
         doc = await self.repository.get_by_id(id)
         return self._to_response(doc) if doc else None
 

@@ -9,7 +9,7 @@ from ..repositories.user_repo import UserRepository
 from .base_service import BaseService
 
 
-class UserService(BaseService[User, UserResponse, UserRepository]):
+class UserService(BaseService[User, UserRepository, UserResponse]):
     def __init__(self, repository: UserRepository):
         super().__init__(repository)
         self.repository: UserRepository = repository  # Specify repository type
