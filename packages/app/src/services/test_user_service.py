@@ -1,4 +1,3 @@
-# src/services/test_user_service.py
 from datetime import datetime
 from unittest.mock import ANY, create_autospec
 
