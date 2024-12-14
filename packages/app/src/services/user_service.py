@@ -1,4 +1,3 @@
-# src/services/user_service.py
 from datetime import UTC, datetime
 from typing import Optional
 
