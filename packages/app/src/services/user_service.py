@@ -5,13 +5,14 @@ from typeid import TypeID
 
 from ..dto.user_dto import CreateUserRequest, UpdateUserRequest, UserResponse
 from ..models.user import User
-from ..repositories.base_repository import BaseRepository
+from ..repositories.user_repo import UserRepository
 from .base_service import BaseService
 
 
-class UserService(BaseService[User, UserResponse]):
-    def __init__(self, repository: BaseRepository[User]):
+class UserService(BaseService[User, UserResponse, UserRepository]):
+    def __init__(self, repository: UserRepository):
         super().__init__(repository)
+        self.repository: UserRepository = repository  # Specify repository type
 
     def _to_response(self, user: User) -> UserResponse:
         return UserResponse(
@@ -26,7 +27,7 @@ class UserService(BaseService[User, UserResponse]):
         user = User(
             id=TypeID(prefix="user"), name=user_request.name, email=user_request.email
         )
-        created_user = await self.repository.create(user)
+        created_user = await self.repository.create_user(user)
         return self._to_response(created_user)
 
     async def update_user(
@@ -40,5 +41,5 @@ class UserService(BaseService[User, UserResponse]):
         return await self.get_by_id(id)
 
     async def find_by_email(self, email: str) -> Optional[UserResponse]:
-        user = await self.repository.find_one({"email": email})
+        user = await self.repository.get_by_email(email)
         return self._to_response(user) if user else None

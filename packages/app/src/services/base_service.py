@@ -8,10 +8,11 @@ from ..repositories.base_repository import BaseRepository
 
 D = TypeVar("D", bound=BaseDocument)
 R = TypeVar("R", bound=BaseModel)  # R represents the response model
+RepoType = TypeVar("RepoType", bound=BaseRepository[D])
 
 
-class BaseService(Generic[D, R]):
-    def __init__(self, repository: BaseRepository[D]):
+class BaseService(Generic[D, R, RepoType]):
+    def __init__(self, repository: RepoType):
         self.repository = repository
 
     def _to_response(self, doc: D) -> R:

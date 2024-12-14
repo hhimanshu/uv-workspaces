@@ -1,6 +1,6 @@
 # src/services/test_user_service.py
 from datetime import datetime
-from unittest.mock import create_autospec
+from unittest.mock import ANY, create_autospec
 
 import pytest
 from faker import Faker
@@ -8,7 +8,7 @@ from typeid import TypeID
 
 from ..dto.user_dto import CreateUserRequest, UpdateUserRequest
 from ..models.user import User
-from ..repositories.base_repository import BaseRepository
+from ..repositories.user_repo import UserRepository
 from .user_service import UserService
 
 fake = Faker()
@@ -17,7 +17,7 @@ fake = Faker()
 class TestUserService:
     @pytest.fixture
     def mock_repository(self):
-        return create_autospec(BaseRepository, instance=True)
+        return create_autospec(UserRepository, instance=True)
 
     @pytest.fixture
     def user_service(self, mock_repository):
@@ -39,7 +39,7 @@ class TestUserService:
     async def test_create_user(self, user_service, mock_repository):
         request = CreateUserRequest(name=fake.name(), email=fake.email())
 
-        mock_repository.create.return_value = User(
+        mock_repository.create_user.return_value = User(
             id=TypeID(prefix="user"), name=request.name, email=request.email
         )
 
@@ -47,7 +47,7 @@ class TestUserService:
         assert str(response.id).startswith("user_")
         assert response.name == request.name
         assert response.email == request.email
-        mock_repository.create.assert_called_once()
+        mock_repository.create_user.assert_called_once_with(ANY)
 
     @pytest.mark.asyncio
     async def test_update_user(self, user_service, mock_repository):
@@ -66,12 +66,12 @@ class TestUserService:
     async def test_find_by_email(self, user_service, mock_repository):
         email = fake.email()
         user = User(id=TypeID(prefix="user"), name=fake.name(), email=email)
-        mock_repository.find_one.return_value = user
+        mock_repository.get_by_email.return_value = user
 
         response = await user_service.find_by_email(email)
         assert str(response.id).startswith("user_")
         assert response.email == email
-        mock_repository.find_one.assert_called_once_with({"email": email})
+        mock_repository.get_by_email.assert_called_once_with(email)
 
     @pytest.mark.asyncio
     async def test_update_user_not_found(self, user_service, mock_repository):
