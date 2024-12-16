@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from services.dependencies import get_user_service
 from services.user_service import UserService
 
+
 router = APIRouter(
     prefix="/users",
     tags=["users"],
@@ -15,7 +16,6 @@ async def create_user(
     user_request: CreateUserRequest,
     user_service: UserService = Depends(get_user_service),
 ):
-    # Call UserService.create_user
     return await user_service.create_user(user_request)
 
 

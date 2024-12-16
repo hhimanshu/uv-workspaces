@@ -24,3 +24,29 @@ packages = ["packages/*"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+# Moved all linting related configs under [tool.ruff.lint]
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+fixable = ["ALL"]
+
+# Moved isort settings under lint
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+known-first-party = ["app", "api"]
+
+# Format settings remain at their own level
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
