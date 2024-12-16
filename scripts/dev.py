@@ -1,8 +1,9 @@
+import asyncio
 import os
 import subprocess
 import sys
 from pathlib import Path
-import asyncio
+
 import motor.motor_asyncio
 
 
