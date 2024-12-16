@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends
 from services.dependencies import get_user_service
 from services.user_service import UserService
 
+from src._lib.shared import ApiVersion, get_api_version
+
 
 router = APIRouter(
     prefix="/users",
@@ -15,8 +17,13 @@ router = APIRouter(
 async def create_user(
     user_request: CreateUserRequest,
     user_service: UserService = Depends(get_user_service),
+    api_version: ApiVersion = Depends(get_api_version),
 ):
-    return await user_service.create_user(user_request)
+    if api_version == ApiVersion.V2024_10_PREVIEW:
+        return await user_service.create_user(user_request)
+    response = await user_service.create_user(user_request)
+    response.version = api_version
+    return response
 
 
 # ...existing code for other user endpoints...
