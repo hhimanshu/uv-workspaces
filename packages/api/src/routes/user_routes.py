@@ -13,15 +13,6 @@ router = APIRouter(
 )
 
 
-""" @router.middleware("http")
-async def version_headers_middleware(request: Request, call_next):
-    response = await call_next(request)
-    api_version = request.state.api_version
-    add_version_headers(response, api_version)
-    return response
- """
-
-
 @router.post("/", response_model=UserResponse)
 async def create_user(
     user_request: CreateUserRequest,
