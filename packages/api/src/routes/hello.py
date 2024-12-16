@@ -26,4 +26,5 @@ async def hello_name(name: str):
     Returns:
         dict: A personalized greeting message
     """
+
     return {"message": f"Hello, {name}!"}

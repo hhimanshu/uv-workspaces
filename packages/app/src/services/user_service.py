@@ -2,10 +2,10 @@ from typing import Optional
 
 from typeid import TypeID
 
-from ..dto.user_dto import CreateUserRequest, UpdateUserRequest, UserResponse
-from ..models.user import User
-from ..repositories.user_repo import UserRepository
-from .base_service import BaseService
+from dto.user_dto import CreateUserRequest, UpdateUserRequest, UserResponse
+from models.user import User
+from repositories.user_repo import UserRepository
+from services.base_service import BaseService
 
 
 class UserService(BaseService[User, UserRepository, UserResponse]):

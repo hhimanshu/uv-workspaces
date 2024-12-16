@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import hello
+from src.routes import hello, user_routes
 
 
 def create_app() -> FastAPI:
@@ -8,6 +8,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(hello.router)
+    app.include_router(user_routes.router)
 
     return app
 

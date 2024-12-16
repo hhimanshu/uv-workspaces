@@ -35,6 +35,7 @@ name = "api"
 version = "0.1.0"
 source = { editable = "packages/api" }
 dependencies = [
+    { name = "app" },
     { name = "fastapi" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -48,6 +49,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "app", virtual = "packages/app" },
     { name = "fastapi", specifier = ">=0.109.0" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
@@ -57,7 +59,7 @@ requires-dist = [
 
 [[package]]
 name = "app"
-version = "0.1.0"
+version = "0.1.1"
 source = { virtual = "packages/app" }
 dependencies = [
     { name = "email-validator" },
@@ -85,7 +87,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "testcontainers", marker = "extra == 'dev'", specifier = ">=3.7.1" },
+    { name = "testcontainers", marker = "extra == 'dev'", specifier = ">=4.9.0" },
     { name = "testcontainers-mongodb", marker = "extra == 'dev'", specifier = ">=0.0.1rc1" },
     { name = "typeid-python", specifier = ">=0.3.1" },
 ]

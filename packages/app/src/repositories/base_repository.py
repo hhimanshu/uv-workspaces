@@ -4,7 +4,7 @@ from typing import Generic, List, Optional, TypeVar
 from motor.motor_asyncio import AsyncIOMotorClient
 from typeid import TypeID
 
-from ..models.base_model import BaseDocument
+from models.base_model import BaseDocument
 
 D = TypeVar("D", bound=BaseDocument)
 
