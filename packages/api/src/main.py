@@ -1,7 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from src._lib.endpoints import Endpoints
-from src._lib.shared import custom_openapi
+from src._lib.shared import ApiVersion, add_version_headers, custom_openapi
 from src.routes import hello, user_routes
 
 
@@ -13,6 +13,13 @@ def create_app() -> FastAPI:
         docs_url=Endpoints.DOCS.path,
         openapi_url=Endpoints.OPENAPI.path,
     )
+
+    @app.middleware("http")
+    async def version_headers_middleware(request: Request, call_next):
+        response = await call_next(request)
+        api_version = getattr(request.state, "api_version", ApiVersion.LATEST)
+        add_version_headers(response, api_version)
+        return response
 
     app.include_router(hello.router)
     app.include_router(user_routes.router)

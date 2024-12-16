@@ -13,6 +13,15 @@ router = APIRouter(
 )
 
 
+""" @router.middleware("http")
+async def version_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    api_version = request.state.api_version
+    add_version_headers(response, api_version)
+    return response
+ """
+
+
 @router.post("/", response_model=UserResponse)
 async def create_user(
     user_request: CreateUserRequest,
@@ -21,9 +30,4 @@ async def create_user(
 ):
     if api_version == ApiVersion.V2024_10_PREVIEW:
         return await user_service.create_user(user_request)
-    response = await user_service.create_user(user_request)
-    response.version = api_version
-    return response
-
-
-# ...existing code for other user endpoints...
+    return await user_service.create_user(user_request)
