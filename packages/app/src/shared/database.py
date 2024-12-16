@@ -2,7 +2,7 @@ from typing import Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from src.config import get_app_db_name, get_mongodb_url
+from config import get_app_db_name, get_mongodb_url
 
 
 class DatabaseSettings:

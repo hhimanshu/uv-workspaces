@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
-from .utils import get_workspace_root, ensure_virtualenv
+
+from .utils import ensure_virtualenv, get_workspace_root
 
 
 def run_tests(package=None):

@@ -1,5 +1,14 @@
 {
     "cSpell.words": [
-        "bson"
-    ]
+        "bson",
+        "dotenv"
+    ],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "always"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }

@@ -4,7 +4,8 @@ from typing import List, Optional
 
 from typeid import TypeID
 
-from ..models.user import User
+from models.user import User
+
 from .base_repository import BaseRepository
 
 
