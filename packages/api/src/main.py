@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request
 
+from src._lib.custom_openapi import custom_openapi
 from src._lib.endpoints import Endpoints
-from src._lib.shared import ApiVersion, add_version_headers, custom_openapi
+from src._lib.shared import ApiVersion, add_version_headers
 from src.routes import hello, users
 
 
