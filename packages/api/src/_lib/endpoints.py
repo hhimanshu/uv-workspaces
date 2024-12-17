@@ -27,21 +27,25 @@ class ApiEndpoints:
     """Central registry of API endpoints."""
 
     ROOT = Endpoint(path="/")
-    API = Endpoint(path="/api")
-    DOCS = Endpoint(path="/docs")
-    OPENAPI = Endpoint(path="/openapi.json")
-    DEBUG = Endpoint(path="/debug")
-    HELLO = Endpoint(
-        path="/hello",
+    API = Endpoint(
+        path="/api",
         routes={
-            "ROOT": Endpoint(path="/"),
-            "NAME": Endpoint(path="/{name}"),
-        },
-    )
-    USERS = Endpoint(
-        path="/users",
-        routes={
-            "ROOT": Endpoint(path="/"),
+            "DOCS": Endpoint(path="/docs"),
+            "OPENAPI": Endpoint(path="/openapi.json"),
+            "DEBUG": Endpoint(path="/debug"),
+            "HELLO": Endpoint(
+                path="/hello",
+                routes={
+                    "ROOT": Endpoint(path="/"),
+                    "NAME": Endpoint(path="/{name}"),
+                },
+            ),
+            "USERS": Endpoint(
+                path="/users",
+                routes={
+                    "ROOT": Endpoint(path="/"),
+                },
+            ),
         },
     )
 

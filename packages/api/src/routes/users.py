@@ -7,13 +7,13 @@ from src._lib.shared import ApiVersion, get_api_version
 
 
 router = APIRouter(
-    prefix=ApiEndpoints.USERS.path,
+    prefix=ApiEndpoints.API.USERS.path,
     tags=["users"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.post(ApiEndpoints.USERS.ROOT.path, response_model=UserResponse)
+@router.post(ApiEndpoints.API.USERS.ROOT.path, response_model=UserResponse)
 async def create_user(
     user_request: CreateUserRequest,
     user_service: UserService = Depends(get_user_service),

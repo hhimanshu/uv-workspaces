@@ -4,13 +4,13 @@ from src._lib.shared import ApiVersion, get_api_version
 
 
 router = APIRouter(
-    prefix=ApiEndpoints.HELLO.path,
+    prefix=ApiEndpoints.API.HELLO.path,
     tags=["hello"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.get(ApiEndpoints.HELLO.ROOT.path)
+@router.get(ApiEndpoints.API.HELLO.ROOT.path)
 async def hello_world():
     """
     A simple hello world endpoint to verify the API is working.
@@ -20,7 +20,7 @@ async def hello_world():
     return {"message": "Hello, World!"}
 
 
-@router.get(ApiEndpoints.HELLO.NAME.path)
+@router.get(ApiEndpoints.API.HELLO.NAME.path)
 async def hello_name(
     name: str,
     api_version: ApiVersion = Depends(get_api_version),
