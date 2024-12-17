@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 
 from src._lib.endpoints import Endpoints
 from src._lib.shared import ApiVersion, add_version_headers, custom_openapi
-from src.routes import hello, user_routes
+from src.routes import hello, users
 
 
 def create_app() -> FastAPI:
@@ -22,7 +22,7 @@ def create_app() -> FastAPI:
         return response
 
     app.include_router(hello.router)
-    app.include_router(user_routes.router)
+    app.include_router(users.router)
 
     return app
 
