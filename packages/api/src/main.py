@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 
 from src._lib.custom_openapi import custom_openapi
-from src._lib.endpoints import Endpoints
+from src._lib.endpoints import ApiEndpoints
 from src._lib.shared import ApiVersion, add_version_headers
 from src.routes import hello, users
 
@@ -10,9 +10,9 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Your API",
         description="API routes and mappings",
-        root_path=Endpoints.API.path,
-        docs_url=Endpoints.DOCS.path,
-        openapi_url=Endpoints.OPENAPI.path,
+        root_path=ApiEndpoints.API.path,
+        docs_url=ApiEndpoints.DOCS.path,
+        openapi_url=ApiEndpoints.OPENAPI.path,
     )
 
     @app.middleware("http")
@@ -32,12 +32,12 @@ app = create_app()
 app.openapi = custom_openapi(app)
 
 
-@app.get(Endpoints.ROOT.path)
+@app.get(ApiEndpoints.ROOT.path)
 async def root():
     return {"message": "Welcome to the API"}
 
 
-@app.get(Endpoints.DEBUG.path)
+@app.get(ApiEndpoints.DEBUG.path)
 async def debug_info():
     return {
         "openapi_url": app.openapi_url,

@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends
 
+from src._lib.endpoints import ApiEndpoints
 from src._lib.shared import ApiVersion, get_api_version
 
 
 router = APIRouter(
-    prefix="/hello",
-    tags=["hello"],
+    prefix=ApiEndpoints.HELLO.path,
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.get("/")
+@router.get(ApiEndpoints.HELLO.ROOT.path)
 async def hello_world():
     """
     A simple hello world endpoint to verify the API is working.
@@ -20,7 +20,7 @@ async def hello_world():
     return {"message": "Hello, World!"}
 
 
-@router.get("/{name}")
+@router.get(ApiEndpoints.HELLO.NAME.path)
 async def hello_name(
     name: str,
     api_version: ApiVersion = Depends(get_api_version),
