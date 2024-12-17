@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-
 from src._lib.endpoints import ApiEndpoints
 from src._lib.shared import ApiVersion, get_api_version
 
