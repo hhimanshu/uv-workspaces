@@ -25,22 +25,20 @@ def create_app() -> FastAPI:
     app.include_router(hello.router)
     app.include_router(users.router)
 
+    @app.get(ApiEndpoints.ROOT.path)
+    async def root():
+        return {"message": "Welcome to the API"}
+
+    @app.get(ApiEndpoints.DEBUG.path)
+    async def debug_info():
+        return {
+            "openapi_url": app.openapi_url,
+            "docs_url": app.docs_url,
+            "routes": [{"path": route.path, "name": route.name} for route in app.routes],
+        }
+
     return app
 
 
 app = create_app()
 app.openapi = custom_openapi(app)
-
-
-@app.get(ApiEndpoints.ROOT.path)
-async def root():
-    return {"message": "Welcome to the API"}
-
-
-@app.get(ApiEndpoints.DEBUG.path)
-async def debug_info():
-    return {
-        "openapi_url": app.openapi_url,
-        "docs_url": app.docs_url,
-        "routes": [{"path": route.path, "name": route.name} for route in app.routes],
-    }
