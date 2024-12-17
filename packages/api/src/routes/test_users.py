@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from services.dependencies import get_user_service
+from src._lib.endpoints import ApiEndpoints
 from src._lib.shared import ApiVersion
 from src.main import app
 from src.test_utils.api_path import get_api_path
@@ -25,7 +26,7 @@ def test_create_user_success():
         "email": "test2@example.com",
     }
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         json=user_data,
     )
     assert response.status_code == 200
@@ -46,7 +47,7 @@ def test_create_user_preview_version():
     }
 
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         json=user_data,
         headers={"api-version": ApiVersion.V2024_10_PREVIEW},
     )
@@ -66,7 +67,7 @@ def test_create_user_invalid_email():
         "email": "invalidemail",
     }
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         json=user_data,
     )
     assert response.status_code == 422
@@ -80,7 +81,7 @@ def test_create_user_missing_required():
         "name": "testuser5",
     }
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         json=user_data,
     )
     assert response.status_code == 422
@@ -95,7 +96,7 @@ def test_create_user_empty_values():
         "email": "",
     }
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         json=user_data,
     )
     assert response.status_code == 422
@@ -107,7 +108,7 @@ def test_create_user_empty_values():
 def test_create_user_invalid_json():
     """Test user creation with invalid JSON payload"""
     response = client.post(
-        get_api_path("/users"),
+        get_api_path(ApiEndpoints.API.USERS.path),
         content="invalid json",
     )
     assert response.status_code == 422

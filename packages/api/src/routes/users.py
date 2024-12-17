@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post(ApiEndpoints.API.USERS.ROOT.path, response_model=UserResponse)
+@router.post("", response_model=UserResponse)
 async def create_user(
     user_request: CreateUserRequest,
     user_service: UserService = Depends(get_user_service),

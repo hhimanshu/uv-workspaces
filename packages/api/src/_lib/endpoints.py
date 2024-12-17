@@ -14,7 +14,8 @@ class Endpoint:
 
     def __post_init__(self):
         """Normalize the path after initialization."""
-        self.path = str(PurePosixPath(self.path))
+        path = str(PurePosixPath(self.path))
+        self.path = path.rstrip("/") if path != "/" else path
 
     def __getattr__(self, name: str) -> "Endpoint":
         """Enable dot notation access to nested routes."""
