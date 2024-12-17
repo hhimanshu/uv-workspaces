@@ -21,34 +21,34 @@ class Endpoints:
     DOCS = Api(path="/docs")
     OPENAPI = Api(path="/openapi.json")
     DEBUG = Api(path="/debug")
-    HELLO = Api(
-        path="/hello",
-        routes={
-            "GREET": Api(path="/greet/{name}", params=["name"]),
-            "TODAY": Api(path="/today", query_params=["format"]),
-        },
-    )
-    MATH = Api(path="/math")
-    DISHES = Api(
-        path="/dishes",
-        routes={
-            "SEARCH": Api(path="/search"),
-        },
-    )
-    CLEANCARROT = Api(
-        path="/cleancarrot",
-        routes={
-            "SEARCH_SESSIONS": Api(path="/search-sessions"),
-            "SEARCH_SESSION": Api(
-                path="/search-sessions/{search_session_id}",
-                params=["search_session_id"],
-            ),
-            "FEEDBACKS": Api(
-                path="/search-sessions/{search_session_id}/feedbacks",
-                params=["search_session_id"],
-            ),
-        },
-    )
+    # HELLO = Api(
+    #     path="/hello",
+    #     routes={
+    #         "GREET": Api(path="/greet/{name}", params=["name"]),
+    #         "TODAY": Api(path="/today", query_params=["format"]),
+    #     },
+    # )
+    # MATH = Api(path="/math")
+    # DISHES = Api(
+    #     path="/dishes",
+    #     routes={
+    #         "SEARCH": Api(path="/search"),
+    #     },
+    # )
+    # CLEANCARROT = Api(
+    #     path="/cleancarrot",
+    #     routes={
+    #         "SEARCH_SESSIONS": Api(path="/search-sessions"),
+    #         "SEARCH_SESSION": Api(
+    #             path="/search-sessions/{search_session_id}",
+    #             params=["search_session_id"],
+    #         ),
+    #         "FEEDBACKS": Api(
+    #             path="/search-sessions/{search_session_id}/feedbacks",
+    #             params=["search_session_id"],
+    #         ),
+    #     },
+    # )
 
     @classmethod
     def get_full_path(cls, *args: Any, **kwargs: Any) -> str:
