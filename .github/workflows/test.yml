@@ -16,7 +16,7 @@ env:
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    name: Tests
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     permissions:
