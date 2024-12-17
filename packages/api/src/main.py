@@ -22,9 +22,6 @@ def create_app() -> FastAPI:
         add_version_headers(response, api_version)
         return response
 
-    app.include_router(hello.router)
-    app.include_router(users.router)
-
     @app.get(ApiEndpoints.ROOT.path)
     async def root():
         return {"message": "Welcome to the API"}
@@ -36,6 +33,10 @@ def create_app() -> FastAPI:
             "docs_url": app.docs_url,
             "routes": [{"path": route.path, "name": route.name} for route in app.routes],
         }
+
+    # Include the routers from the routes package
+    app.include_router(hello.router)
+    app.include_router(users.router)
 
     return app
 

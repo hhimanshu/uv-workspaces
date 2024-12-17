@@ -6,6 +6,7 @@ from src._lib.shared import ApiVersion, get_api_version
 
 router = APIRouter(
     prefix=ApiEndpoints.HELLO.path,
+    tags=["hello"],
     responses={404: {"description": "Not found"}},
 )
 
