@@ -22,8 +22,8 @@ client = TestClient(app)
 def test_create_user_success():
     """Test successful user creation with valid data"""
     user_data = {
-        "name": "testuser2",
-        "email": "test2@example.com",
+        "name": "John Smith",
+        "email": "john.smith@company.com",
     }
     response = client.post(
         get_api_path(ApiEndpoints.API.USERS.path),
@@ -42,8 +42,8 @@ def test_create_user_success():
 def test_create_user_preview_version():
     """Test user creation with preview version"""
     user_data = {
-        "name": "testuser3",
-        "email": "testuser3@example.com",
+        "name": "Sarah Johnson",
+        "email": "sarah.j@enterprise.co.uk",
     }
 
     response = client.post(
@@ -63,8 +63,8 @@ def test_create_user_preview_version():
 def test_create_user_invalid_email():
     """Test user creation with invalid email format"""
     user_data = {
-        "name": "testuser4",
-        "email": "invalidemail",
+        "name": "Michael Brown",
+        "email": "michael@incomplete",  # Invalid domain
     }
     response = client.post(
         get_api_path(ApiEndpoints.API.USERS.path),
@@ -78,7 +78,8 @@ def test_create_user_invalid_email():
 def test_create_user_missing_required():
     """Test user creation with missing required fields"""
     user_data = {
-        "name": "testuser5",
+        "name": "Emily Davis",
+        # email intentionally omitted
     }
     response = client.post(
         get_api_path(ApiEndpoints.API.USERS.path),
@@ -92,8 +93,8 @@ def test_create_user_missing_required():
 def test_create_user_empty_values():
     """Test user creation with empty string values"""
     user_data = {
-        "name": "",
-        "email": "",
+        "name": "",  # Empty name
+        "email": "",  # Empty email
     }
     response = client.post(
         get_api_path(ApiEndpoints.API.USERS.path),
