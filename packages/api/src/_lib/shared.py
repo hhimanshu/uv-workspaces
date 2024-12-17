@@ -77,26 +77,41 @@ def custom_openapi(app: FastAPI):
             )
 
             logger.debug("Adding version parameter to all endpoints")
+            # Define the version parameter once at the components level
+            openapi_schema["components"] = openapi_schema.get("components", {})
+            openapi_schema["components"]["parameters"] = {
+                "ApiVersionHeader": {
+                    "name": "x-api-version",
+                    "in": "header",
+                    "required": False,
+                    "schema": {
+                        "type": "string",
+                        "enum": [
+                            ApiVersion.V2024_08_22,
+                            ApiVersion.V2024_10_PREVIEW,
+                            ApiVersion.LATEST,
+                        ],
+                        "default": ApiVersion.LATEST,
+                    },
+                    "description": "API Version to use",
+                }
+            }
+
+            # Reference the parameter in all paths
             for path in openapi_schema["paths"].values():
                 for method in path.values():
-                    method["parameters"] = [
-                        {
-                            "name": "X-API-VERSION",
-                            "in": "header",
-                            "required": False,
-                            "schema": {
-                                "type": "string",
-                                "enum": [
-                                    ApiVersion.V2024_08_22,
-                                    ApiVersion.V2024_10_PREVIEW,
-                                    ApiVersion.LATEST,
-                                ],
-                            },
-                        }
-                    ] + (method.get("parameters", []))
+                    # Remove any existing x-api-version parameters
+                    if "parameters" in method:
+                        method["parameters"] = [
+                            param
+                            for param in method["parameters"]
+                            if param.get("name", "").lower() != "x-api-version"
+                        ]
 
-            logger.debug("Setting OpenAPI schema")
-            app.openapi_schema = openapi_schema
+                    # Add the reference to our component parameter
+                    method["parameters"] = [
+                        {"$ref": "#/components/parameters/ApiVersionHeader"}
+                    ] + (method.get("parameters", []))
 
             # Modify the servers to include the /api prefix
             openapi_schema["servers"] = [{"url": "/api"}]

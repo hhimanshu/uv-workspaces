@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from src._lib.shared import ApiVersion, get_api_version
 
 
 router = APIRouter(
@@ -19,7 +21,10 @@ async def hello_world():
 
 
 @router.get("/{name}")
-async def hello_name(name: str):
+async def hello_name(
+    name: str,
+    api_version: ApiVersion = Depends(get_api_version),
+):
     """
     Personalized greeting endpoint.
     Args:
@@ -28,4 +33,6 @@ async def hello_name(name: str):
         dict: A personalized greeting message
     """
 
+    if api_version == ApiVersion.V2024_10_PREVIEW:
+        return {"message": f"Hello, {name}! (Preview)"}
     return {"message": f"Hello, {name}!"}
