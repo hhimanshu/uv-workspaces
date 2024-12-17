@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get(ApiEndpoints.API.HELLO.ROOT.path)
+@router.get("")
 async def hello_world():
     """
     A simple hello world endpoint to verify the API is working.
