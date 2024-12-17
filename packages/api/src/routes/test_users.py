@@ -1,7 +1,18 @@
+import pytest
 from fastapi.testclient import TestClient
+from services.dependencies import get_user_service
 from src._lib.shared import ApiVersion
 from src.main import app
 from src.test_utils.api_path import get_api_path
+from src.test_utils.test_dependencies import TestDependencies
+
+
+@pytest.fixture(autouse=True)
+def override_dependencies():
+    app.dependency_overrides[get_user_service] = TestDependencies.get_user_service
+    yield
+    app.dependency_overrides = {}
+    TestDependencies.cleanup()
 
 
 client = TestClient(app)
