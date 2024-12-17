@@ -2,7 +2,6 @@ from dto.user_dto import CreateUserRequest, UserResponse
 from fastapi import APIRouter, Depends
 from services.dependencies import get_user_service
 from services.user_service import UserService
-
 from src._lib.endpoints import ApiEndpoints
 from src._lib.shared import ApiVersion, get_api_version
 
