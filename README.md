@@ -48,3 +48,17 @@ python -m scripts.test api
 # Run only app tests
 python -m scripts.test app
 ```
+
+## Next Steps
+
+- Restructure the code.
+  - Move `packages/services` to `app/services`.
+    - Ensure the tests are working that depend on TestContainer.
+  - In `api/`, create routes per project such as `platform`, `cc` (meaning clean carrot), etc
+  - Rename `app` workspace to `platform`.
+- Develop API endpoints for users (finding the glue between openapi and fastapi).
+  - Create `fastapi` code in `api/` for user endpoints.
+    - Create necessary `dto`, `routes` and `services` for user endpoints.
+    - Write tests for user endpoints.
+    - Document the process.
+  - **Note**: The `openapi/` directory is for the OpenAPI schema. This is generated using [`tspec101`](https://github.com/hhimanshu/tspec101) codebase.
