@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: App Store API
+  version: 2024-12-19-preview
+tags: []
+paths:
+  /users:
+    get:
+      operationId: Users_listUsers
+      description: List all users
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+      security:
+        - ApiKeyAuth: []
+components:
+  schemas:
+    AppStoreVersions:
+      type: string
+      enum:
+        - 2024-12-19-preview
+    NotFoundError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - NOT_FOUND
+        message:
+          type: string
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+    UserCreateRequest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+    UserCreatedResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    UserNotFoundError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          enum:
+            - User not found
+      allOf:
+        - $ref: '#/components/schemas/NotFoundError'
+    UserUpdateRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UserCreateRequest'
+    UserUpdatedResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-ps-api-key
+servers:
+  - url: https://appstore.com
+    description: API Server for App Store
+    variables: {}
